@@ -1,0 +1,10 @@
+# Copy to dataset.yaml and update path after preparing a YOLO-format dataset.
+path: E:/datasets/bike-helmet
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: helmet
+  1: no_helmet
+

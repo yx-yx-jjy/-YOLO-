@@ -1,0 +1,111 @@
+[
+  {
+    "path": "/screen",
+    "errors": [],
+    "failed": [
+      "GET https://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3348&y=1682&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd04.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3349&y=1682&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3348&y=1681&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3349&y=1681&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd04.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3348&y=1683&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3349&y=1683&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3347&y=1682&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3350&y=1682&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3347&y=1681&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd04.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3350&y=1681&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3347&y=1683&z=12 :: net::ERR_ABORTED",
+      "GET https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=3350&y=1683&z=12 :: net::ERR_ABORTED"
+    ],
+    "probe": {
+      "todayViolations": null,
+      "pending": "116",
+      "approved": "576",
+      "rejected": "93",
+      "avgConfidence": "84%",
+      "historyTotal": null,
+      "reviewRate": "785",
+      "analysisScanned": null,
+      "loginUser": null
+    }
+  },
+  {
+    "path": "/history",
+    "errors": [],
+    "failed": [],
+    "probe": {
+      "todayViolations": null,
+      "pending": "116",
+      "approved": "576",
+      "rejected": "93",
+      "avgConfidence": null,
+      "historyTotal": null,
+      "reviewRate": null,
+      "analysisScanned": null,
+      "loginUser": null
+    }
+  },
+  {
+    "path": "/analysis",
+    "errors": [],
+    "failed": [],
+    "probe": {
+      "todayViolations": null,
+      "pending": null,
+      "approved": null,
+      "rejected": null,
+      "avgConfidence": null,
+      "historyTotal": null,
+      "reviewRate": null,
+      "analysisScanned": "178",
+      "loginUser": null
+    }
+  },
+  {
+    "path": "/model",
+    "errors": [],
+    "failed": [],
+    "probe": {
+      "todayViolations": null,
+      "pending": null,
+      "approved": null,
+      "rejected": null,
+      "avgConfidence": null,
+      "historyTotal": null,
+      "reviewRate": null,
+      "analysisScanned": null,
+      "loginUser": null
+    }
+  },
+  {
+    "path": "/metrics",
+    "errors": [],
+    "failed": [],
+    "probe": {
+      "todayViolations": null,
+      "pending": null,
+      "approved": null,
+      "rejected": null,
+      "avgConfidence": null,
+      "historyTotal": null,
+      "reviewRate": null,
+      "analysisScanned": null,
+      "loginUser": null
+    }
+  },
+  {
+    "path": "/login",
+    "errors": [],
+    "failed": [],
+    "probe": {
+      "todayViolations": null,
+      "pending": null,
+      "approved": null,
+      "rejected": null,
+      "avgConfidence": null,
+      "historyTotal": null,
+      "reviewRate": null,
+      "analysisScanned": null,
+      "loginUser": null
+    }
+  }
+]

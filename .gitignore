@@ -1,0 +1,94 @@
+# ---------------------------------------------------------------------------
+# Ignore rules for the non-motor-vehicle violation platform.
+# Clean, lightweight configuration for GitHub open-source or private backup.
+# ---------------------------------------------------------------------------
+
+# --- Academic & Thesis Documents (DO NOT PUBLISH) ---------------------------
+# 严格防止毕业论文原稿、答辩材料上传到公共网络导致查重率异常
+deliverables/
+*.docx
+*.pdf
+
+# --- Runtime database (SQLite, WAL mode) -----------------------------------
+# Never commit the database or its WAL sidecar files.
+backend/storage/*.db
+backend/storage/*.db-wal
+backend/storage/*.db-shm
+backend/storage/backups/
+backend/storage/artifacts/
+backend/storage/uploads/
+history_copy.sqlite
+
+# --- Runtime logs & probes -------------------------------------------------
+backend/storage/*.log
+*.log
+_probe.*
+backend/experiments/review_crops/
+
+# --- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+backend/.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Node / frontend -------------------------------------------------------
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-error.log*
+
+# --- Model weights and datasets (large binaries >10GB) ----------------------
+*.onnx
+*.engine
+backend/runs/
+数据集/
+YOLO测试图片/
+标注工作区/
+标注工作区-载人/
+
+# 忽略临时/备份权重，放行2个核心生产模型（均 <20MB）
+*.pt
+backend/models/*.pt
+!backend/models/best.pt
+!backend/yolo11s.pt
+
+# 忽略海量原始素材，精准放行4路在线路口摄像头演示视频（单个均 <55MB）
+data/*
+!data/videos/
+data/videos/*
+!data/videos/bilibili_cam.mp4
+!data/videos/douyin_cam.mp4
+!data/videos/douyin_helmet_cam.mp4
+!data/videos/wuhan_intersection_rush.mp4
+
+# --- Temporary scripts, crawler dumps & tools ------------------------------
+decoded_*.json
+douyin_*.html
+douyin_*.json
+crawler_images.py
+parse_*.py
+extract_frames_for_label.py
+search_video.py
+check_history.py
+temp_*
+tools/
+查看训练*.bat
+start-cloudflared.bat
+
+# --- Editor / OS -----------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+.cdp-measure/
+.workbuddy/
+.run/
+
+# --- Local secrets ---------------------------------------------------------
+backend/.env
+*.local

@@ -1,0 +1,6 @@
+﻿文件名,gt,relative_foot_y,人工判读(实际查看图片),应当接受还是拒绝,放宽foot_y能否挽回
+helmet-voc-clean-v1/Helmet_detection.1803.jpg,1,0.9807 / 1.0020,"真骑乘(绿背心男骑电动车+白T男骑摩托,均未戴盔)",应接受,是(0.99挽回)
+helmet-voc-clean-v1/Helmet_detection.6471.jpg,1,0.9833,"真骑乘(女子骑共享单车,未戴盔)",应接受,是(0.99挽回)
+helmet-voc-clean-v1/Helmet_detection.536.jpg,1,0.9972,"真骑乘(男子骑摩托,未戴盔)",应接受,"否(需>=1.0,且1.0会连带引入误报)"
+helmet-voc-clean-v1/Helmet_detection.1894.jpg,1,1.0100,"下车推行(单脚着地推车,非骑乘)",应拒绝,否(不应挽回)
+bike-helmet-yolo/BikesHelmets476_png_jpg.rf.8e8a6b902f3a1faac87f60af24913811.jpg,0,0.9997,"素材图实为戴头盔者,裸头框是检测器误检",应拒绝,否(1.0起会引入误报)

@@ -1,0 +1,626 @@
+{
+  "evaluation_protocol": {
+    "level": "image_level",
+    "definition": "gt_violation=1 当且仅当该图标签中至少有一个 class==1(no_helmet) 框；pred_violation=1 当且仅当规则引擎返回至少一个 code==NO_HELMET 事件。",
+    "limitation": "标签无 person/vehicle 标注，无法区分骑乘者违规与路人违规，Precision 会被路人误报拉低；该口径不是框级 mAP。",
+    "fps_definition": "rule_fps = 1000/avg_decide_ms，仅统计规则引擎纯 CPU 判定，不含检测器 GPU 推理与图像解码。",
+    "inference_config": {
+      "helmet_model": "E:\\基于YOLO\\backend\\models\\best.pt",
+      "helmet_imgsz": 960,
+      "helmet_conf": 0.25,
+      "context_model": "E:\\基于YOLO\\backend\\yolo11s.pt",
+      "context_imgsz": 640,
+      "context_conf": 0.25,
+      "context_classes": [
+        0,
+        1,
+        3
+      ]
+    },
+    "rule_constants": {
+      "RIDER_HORIZONTAL_INSET": 0.1,
+      "RIDER_MAX_FOOT_Y": 0.99,
+      "RIDER_MAX_MATCH_SCORE": 0.82
+    }
+  },
+  "distribution": {
+    "n_images": 859,
+    "n_pos": 416,
+    "n_neg": 443
+  },
+  "groups": [
+    {
+      "group": "A",
+      "label": "仅检测",
+      "description": "基线：检出 no_helmet 框即判违规。不做人车关联、不做头部区域约束。",
+      "flags": {
+        "rider_attribution": false,
+        "head_zone": false,
+        "confidence_arbitration": false,
+        "temporal_vote": false
+      }
+    },
+    {
+      "group": "B",
+      "label": "+骑乘归属",
+      "description": "在 A 基础上启用足部锚点与几何约束：必须存在真的骑在车上的 person。头部区域约束关闭，裸头框直接算违规。",
+      "flags": {
+        "rider_attribution": true,
+        "head_zone": false,
+        "confidence_arbitration": false,
+        "temporal_vote": false
+      }
+    },
+    {
+      "group": "C",
+      "label": "+头部区域",
+      "description": "在 B 基础上启用头部区域约束：裸头框必须落在骑乘者头部区域内才算违规。此组不做置信度仲裁（裸头优先于头盔框），也不产出 HELMET_UNCERTAIN。",
+      "flags": {
+        "rider_attribution": true,
+        "head_zone": true,
+        "confidence_arbitration": false,
+        "temporal_vote": false
+      }
+    },
+    {
+      "group": "D",
+      "label": "+置信度/三态",
+      "description": "在 C 基础上启用 min() 置信度瓶颈融合与 helmet/bare_head/unknown 三态仲裁。此组等价于生产 rules.evaluate_violations。",
+      "flags": {
+        "rider_attribution": true,
+        "head_zone": true,
+        "confidence_arbitration": true,
+        "temporal_vote": false
+      }
+    },
+    {
+      "group": "E",
+      "label": "+时序投票",
+      "description": "全系统。在 D 基础上叠加同 track_id 连续命中帧的时序确认。",
+      "flags": {
+        "rider_attribution": true,
+        "head_zone": true,
+        "confidence_arbitration": true,
+        "temporal_vote": true
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "group": "A",
+      "label": "仅检测",
+      "tp": 342,
+      "fp": 29,
+      "fn": 74,
+      "tn": 414,
+      "precision": 0.9218,
+      "recall": 0.8221,
+      "f1": 0.8691,
+      "false_positive_rate": 0.0655,
+      "accuracy": 0.8801,
+      "avg_decide_ms": 0.003,
+      "rule_fps": 329839.0,
+      "n_images": 859,
+      "n_gt_violation": 416,
+      "n_gt_normal": 443,
+      "positive_subset_recall": 0.8221,
+      "n_events": 547,
+      "n_uncertain": 0
+    },
+    {
+      "group": "B",
+      "label": "+骑乘归属",
+      "tp": 331,
+      "fp": 26,
+      "fn": 85,
+      "tn": 417,
+      "precision": 0.9272,
+      "recall": 0.7957,
+      "f1": 0.8564,
+      "false_positive_rate": 0.0587,
+      "accuracy": 0.8708,
+      "avg_decide_ms": 0.0083,
+      "rule_fps": 120284.5,
+      "n_images": 859,
+      "n_gt_violation": 416,
+      "n_gt_normal": 443,
+      "positive_subset_recall": 0.7957,
+      "n_events": 597,
+      "n_uncertain": 0
+    },
+    {
+      "group": "C",
+      "label": "+头部区域",
+      "tp": 323,
+      "fp": 19,
+      "fn": 93,
+      "tn": 424,
+      "precision": 0.9444,
+      "recall": 0.7764,
+      "f1": 0.8522,
+      "false_positive_rate": 0.0429,
+      "accuracy": 0.8696,
+      "avg_decide_ms": 0.0114,
+      "rule_fps": 87851.2,
+      "n_images": 859,
+      "n_gt_violation": 416,
+      "n_gt_normal": 443,
+      "positive_subset_recall": 0.7764,
+      "n_events": 464,
+      "n_uncertain": 0
+    },
+    {
+      "group": "D",
+      "label": "+置信度/三态",
+      "tp": 317,
+      "fp": 12,
+      "fn": 99,
+      "tn": 431,
+      "precision": 0.9635,
+      "recall": 0.762,
+      "f1": 0.851,
+      "false_positive_rate": 0.0271,
+      "accuracy": 0.8708,
+      "avg_decide_ms": 0.0135,
+      "rule_fps": 73921.7,
+      "n_images": 859,
+      "n_gt_violation": 416,
+      "n_gt_normal": 443,
+      "positive_subset_recall": 0.762,
+      "n_events": 445,
+      "n_uncertain": 213
+    },
+    {
+      "group": "E",
+      "label": "+时序投票",
+      "tp": 317,
+      "fp": 12,
+      "fn": 99,
+      "tn": 431,
+      "precision": 0.9635,
+      "recall": 0.762,
+      "f1": 0.851,
+      "false_positive_rate": 0.0271,
+      "accuracy": 0.8708,
+      "avg_decide_ms": 0.014,
+      "rule_fps": 71552.9,
+      "n_images": 859,
+      "n_gt_violation": 416,
+      "n_gt_normal": 443,
+      "positive_subset_recall": 0.762,
+      "n_events": 445,
+      "n_uncertain": 213
+    }
+  ],
+  "flips": {
+    "A->B": [
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1405.jpg",
+        "gt": 0,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=3 vehicle=3 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1432.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=7 vehicle=0 bare_head=6 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1450.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=0 bare_head=2 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1462.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=3 vehicle=0 bare_head=2 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1805.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=0 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1894.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=6 vehicle=3 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.536.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=1 vehicle=1 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.594.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=0 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.598.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=1 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7140.jpg",
+        "gt": 0,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=1 vehicle=0 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7149.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=1 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7152.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=0 bare_head=1 helmet=1 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7159.jpg",
+        "gt": 1,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=5 vehicle=0 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      },
+      {
+        "uid": "bike-helmet-yolo/BikesHelmets476_png_jpg.rf.8e8a6b902f3a1faac87f60af24913811.jpg",
+        "gt": 0,
+        "from_group": "A",
+        "to_group": "B",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=3 vehicle=1 bare_head=1 helmet=0 -> 无人被判定为骑乘者"
+      }
+    ],
+    "B->C": [
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1424.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=5 vehicle=2 bare_head=1 helmet=0 -> 骑乘者=2，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1483.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=8 vehicle=2 bare_head=1 helmet=1 -> 骑乘者=1，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1544.jpg",
+        "gt": 0,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=7 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=1，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1546.jpg",
+        "gt": 0,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=3 vehicle=1 bare_head=2 helmet=1 -> 骑乘者=1，裸头落在头部区域内=2"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1547.jpg",
+        "gt": 0,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=3 vehicle=1 bare_head=2 helmet=1 -> 骑乘者=1，裸头落在头部区域内=2"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1782.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=6 vehicle=3 bare_head=1 helmet=4 -> 骑乘者=4，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1844.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=1，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1852.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=12 vehicle=2 bare_head=2 helmet=0 -> 骑乘者=3，裸头落在头部区域内=2"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1875.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=1，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.4015.jpg",
+        "gt": 0,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=7 vehicle=1 bare_head=1 helmet=0 -> 骑乘者=2，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.4098.jpg",
+        "gt": 0,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=9 vehicle=1 bare_head=1 helmet=0 -> 骑乘者=1，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.6429.jpg",
+        "gt": 0,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=3 vehicle=4 bare_head=1 helmet=1 -> 骑乘者=1，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7143.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=4 vehicle=2 bare_head=1 helmet=1 -> 骑乘者=1，裸头落在头部区域内=1"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7179.jpg",
+        "gt": 1,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=3 vehicle=1 bare_head=3 helmet=1 -> 骑乘者=1，裸头落在头部区域内=3"
+      },
+      {
+        "uid": "bike-helmet-yolo/BikesHelmets345_png_jpg.rf.64be8cc403086a45901013455b78d498.jpg",
+        "gt": 0,
+        "from_group": "B",
+        "to_group": "C",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=9 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=2，裸头落在头部区域内=1"
+      }
+    ],
+    "C->D": [
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1552.jpg",
+        "gt": 0,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=2 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=1，头部裸头=1，头部头盔=1，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1806.jpg",
+        "gt": 1,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=1 bare_head=1 helmet=2 -> 骑乘者=2，头部裸头=1，头部头盔=2，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1829.jpg",
+        "gt": 1,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=2 bare_head=1 helmet=2 -> 骑乘者=2，头部裸头=1，头部头盔=2，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1857.jpg",
+        "gt": 0,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=5 vehicle=2 bare_head=1 helmet=2 -> 骑乘者=3，头部裸头=1，头部头盔=2，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1862.jpg",
+        "gt": 1,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=6 vehicle=2 bare_head=2 helmet=1 -> 骑乘者=3，头部裸头=2，头部头盔=1，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.1876.jpg",
+        "gt": 1,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=7 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=3，头部裸头=1，头部头盔=1，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.4034.jpg",
+        "gt": 0,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=3 vehicle=3 bare_head=1 helmet=3 -> 骑乘者=3，头部裸头=1，头部头盔=3，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.563.jpg",
+        "gt": 0,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=1 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=1，头部裸头=1，头部头盔=1，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.6406.jpg",
+        "gt": 1,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=4 vehicle=1 bare_head=1 helmet=2 -> 骑乘者=1，头部裸头=1，头部头盔=2，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.6413.jpg",
+        "gt": 1,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "真阳性丢失(召回下降)",
+        "reason": "person=2 vehicle=5 bare_head=1 helmet=1 -> 骑乘者=2，头部裸头=1，头部头盔=1，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.6452.jpg",
+        "gt": 0,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=1 vehicle=2 bare_head=1 helmet=1 -> 骑乘者=1，头部裸头=1，头部头盔=1，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7107.jpg",
+        "gt": 0,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=2 vehicle=2 bare_head=1 helmet=2 -> 骑乘者=2，头部裸头=1，头部头盔=2，经置信度仲裁"
+      },
+      {
+        "uid": "helmet-voc-clean-v1/Helmet_detection.7128.jpg",
+        "gt": 0,
+        "from_group": "C",
+        "to_group": "D",
+        "from_pred": 1,
+        "to_pred": 0,
+        "kind": "误报被消除",
+        "reason": "person=1 vehicle=1 bare_head=1 helmet=1 -> 骑乘者=1，头部裸头=1，头部头盔=1，经置信度仲裁"
+      }
+    ],
+    "D->E": []
+  },
+  "temporal_video": null,
+  "total_seconds": 0.72
+}
