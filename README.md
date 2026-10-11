@@ -1,86 +1,128 @@
-# 非机动车违规智能检测
+# 🛵 城市非机动车违法智能检测与综合管控平台
 
-The application now contains a real upload-to-inference pipeline:
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/Vue-3.x-brightgreen?logo=vuedotjs" alt="Vue3">
+  <img src="https://img.shields.io/badge/FastAPI-0.110%2B-teal?logo=fastapi" alt="FastAPI">
+  <img src="https://img.shields.io/badge/YOLO-Ultralytics-orange" alt="YOLO">
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey" alt="License">
+</p>
 
-1. Vue uploads an image or video to FastAPI.
-2. A custom Ultralytics YOLO model detects helmets and bare heads while a COCO YOLO11s model detects people and two-wheelers.
-3. The rule engine associates riders with vehicles and head detections with riders.
-4. Video events require repeated detections on the same ByteTrack trajectory.
-5. Results are returned as annotated evidence and remain pending until human review.
+> 🎓 **作者寄语**：  
+> 这是我的本科毕业设计项目。整个平台从算法模型、视频流推理、违规研判规则引擎，到前后端全栈工程均已完整打通与实测验证。  
+> 现将项目完整开源，**有需要的小伙伴欢迎自取、学习和参考（如果对你有帮助，不妨点个 ⭐️ Star 支持一下！）**。  
+> 项目中难免有考虑不周或可以继续优化的地方，非常欢迎各位老师、同学和技术前辈指出不足，提出您宝贵的建议！
 
-## First-time setup
+---
 
-```powershell
-cd E:\基于YOLO\backend
-.\setup.ps1
+## 📖 项目简介
+
+针对城市交通管理中电动两轮车、摩托车等非机动车“未戴安全头盔”、“违法载人”等突出安全隐患，本项目设计并实现了一套**端到端的非机动车违法智能检测与处置闭环管控平台**。
+
+系统深度融合了 **YOLO 目标检测模型** 与空间拓扑关联算法，结合实时视频流推流、自动证据抓拍留痕、多维统计大屏看板及公众便民复核门户，实现了从**“视频取证 -> AI智能研判 -> 证据入库 -> 人工复核 -> 闭环处置”**的全业务流程。
+
+---
+
+## ✨ 核心特性
+
+- 🎥 **4 路路口实时监控与 YOLO 高精度检测画框**
+  - 内置真实城市路口卡口视频流，支持多路摄像头平滑切换。
+  - 基于轻量 YOLO 实时推理与毫秒级高帧率目标画框渲染，准确定位骑行人员、两轮车及头部区域。
+
+- 🧠 **双重违法智能研判规则引擎**
+  - **未戴安全头盔识别**：精准区分安全头盔与裸露头部，消除帽子、发型带来的误检。
+  - **违规载人检测**：通过空间拓扑关联与骑手-车辆对应关系，智能识别一车多人骑行违规行为。
+  - **抗误报机制**：结合多帧时序跟踪关联，有效过滤镜头晃动、偶发遮挡带来的偶发误报。
+
+- 📑 **完整闭环证据链**
+  - **自动抓拍留痕**：触发违法行为自动生成高清抓拍大图、裁切人脸/头盔特写与违法时段信息。
+  - **人工审核与证据复核**：支持审核民警一键通过、驳回、修改处罚条例。
+  - **双击超清查证**：支持弹窗照片**双击放大、鼠标滚轮平滑缩放、自由拖拽平移**，违规细节毫发毕现。
+
+- 📊 **可视化数据大屏与便民门户**
+  - **综合管控大屏**：路口卡口热力图分布、24小时违法趋势走势、处置进度环形图、重点监控区域动态看板。
+  - **市民复议查询通道**：支持市民通过车牌/处罚单号一键查验违法证据与复议流转。
+
+---
+
+## 🛠️ 技术架构
+
+| 模块 | 技术栈 | 说明 |
+| :--- | :--- | :--- |
+| **前端架构** | Vue 3 + Vite + Pinia + Vue Router | 现代化轻量快速的单页应用 |
+| **UI 组件库** | Element Plus + Tailwind CSS | 工业级交通综合管控设计语言 |
+| **后端架构** | FastAPI + Uvicorn + Pydantic | 高性能异步 RESTful API 与实时流服务 |
+| **核心算法** | Ultralytics YOLO + OpenCV | 轻量化自定义目标检测模型与计算机视觉后处理 |
+| **数据存储** | SQLite 3 (WAL模式) + SQLAlchemy | 零配置轻量嵌入式数据库，自动建表与迁移 |
+
+---
+
+## 🚀 极简运行指南（开箱即用）
+
+项目已内置核心模型权重（`backend/models/best.pt`）及路口测试视频，无需额外配置权重路径，下载即可运行！
+
+### 1. 环境准备
+确保您的电脑已安装：
+- **Python 3.10+**
+- **Node.js 18+**
+
+### 2. 克隆项目
+```bash
+git clone https://github.com/yx-yx-jjy/-YOLO-.git
+cd -YOLO-
 ```
 
-Place the trained custom checkpoint at:
+### 3. 安装依赖（首次运行仅需一次）
+
+**后端依赖：**
+```bash
+cd backend
+python -m venv .venv
+# Windows 激活虚拟环境:
+.venv\Scripts\activate
+pip install -r requirements.txt
+cd ..
+```
+
+**前端依赖：**
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 4. 一键启动
+在项目根目录下，**直接双击运行 `start-dev.bat` 脚本**！
+
+脚本会自动启动后端与前端服务：
+- 🖥️ **前端页面**：[http://127.0.0.1:5173](http://127.0.0.1:5173)（打开即可看到完整数据大屏与实时监控）
+- 🔌 **后端接口文档**：[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+> 💡 *退出方式：关闭弹出的两个终端控制台窗口即可。*
+
+---
+
+## 📂 项目结构概览
 
 ```text
-E:\基于YOLO\backend\models\best.pt
+├── backend/                  # 后端工程
+│   ├── app/                  # FastAPI 核心业务代码（路由、算法推理、规则引擎）
+│   ├── models/               # 训练好的 YOLO 核心权重（best.pt）
+│   ├── scripts/              # 数据库迁移与台账初始化脚本
+│   └── requirements.txt      # Python 依赖清单
+├── frontend/                 # 前端工程
+│   ├── src/                  # Vue 3 源码（大屏看板、摄像头监控、台账审核）
+│   └── package.json          # Node 依赖配置
+├── data/
+│   └── videos/               # 4路路口卡口真实场景演示视频流
+├── start-dev.bat             # 一键启动脚本（前后端同时拉起）
+└── README.md                 # 项目介绍文档
 ```
 
-Start the backend:
+---
 
-```powershell
-cd E:\基于YOLO\backend
-.\run.ps1
-```
+## ⚠️ 特别声明
 
-Start the frontend in another terminal:
-
-```powershell
-cd E:\基于YOLO\frontend
-npm run dev
-```
-
-The API status endpoint is `http://127.0.0.1:8000/api/health`.
-
-Helmet/head and person/vehicle inference use separate confidence thresholds.
-The defaults are `0.20` and `0.20` respectively because small or occluded
-two-wheelers commonly score lower than people. Override them with
-`YOLO_HELMET_CONFIDENCE` and `YOLO_CONTEXT_CONFIDENCE` when calibrating on a
-new validation set. For image uploads, vehicles whose rider has an unknown
-helmet state trigger a second pass over the rider's head crop at `0.08`; set
-`YOLO_ROI_HELMET_CONFIDENCE` to calibrate that gated fallback.
-
-## Model training
-
-Prepare a YOLO-format custom dataset with the `helmet` and `no_helmet`
-classes. Person and two-wheeler context comes from the COCO-pretrained model.
-
-The current helmet model uses the CC BY 4.0
-[`shravya11/bike-helmet-dataset`](https://huggingface.co/datasets/shravya11/bike-helmet-dataset).
-Only its annotated COCO `train`, `valid`, and `test` splits are used. Convert
-them reproducibly with:
-
-```powershell
-cd E:\基于YOLO
-.\backend\.venv\Scripts\python.exe .\backend\training\prepare_coco.py `
-  --source .\data\bike-helmet-repo `
-  --output .\data\bike-helmet-yolo
-```
-
-The resulting two-class checkpoint (`helmet`, `no_helmet`) is combined at
-inference time with `backend/yolo11s.pt` for the `person`, `bicycle`, and
-`motorcycle` context classes.
-
-Train on the RTX 4060 with:
-
-```powershell
-cd E:\基于YOLO\backend
-.\.venv\Scripts\python.exe .\training\train.py `
-  --data E:\基于YOLO\data\bike-helmet-yolo\dataset.yaml `
-  --base .\yolo11s.pt --epochs 100 --imgsz 640 --batch 8
-```
-
-Copy the resulting `weights/best.pt` to `backend/models/best.pt` and restart
-the backend. Validate on a held-out test set before using the output as an
-enforcement lead. Precision, recall, mAP50-95, per-class confusion matrices,
-night/rain performance, and false-positive rate must all be reported.
-
-The system intentionally does not infer a helmet violation from the absence of
-a helmet box. It requires a positive `no_helmet` detection, and every generated
-event is marked for manual review.
-
+1. **学术用途**：本项目为个人**本科毕业设计**研发作品，仅供学习、学术交流与科研参考，切勿用于商业用途。
+2. **数据脱敏**：系统中演示用的违规台账、人脸及车辆卡口信息均已进行技术脱敏处理，不涉及任何现实公民个人隐私。
+3. **欢迎交流**：如果觉得这个项目对您的学习、课程设计或毕设有所启发，欢迎给个 **Star ⭐️**！有任何 Bug、疑惑或更好的改进思路，欢迎提交 Issue 或提出宝贵建议！
